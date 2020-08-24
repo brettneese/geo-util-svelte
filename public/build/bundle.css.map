@@ -1,0 +1,14 @@
+{
+  "version": 3,
+  "file": "bundle.css",
+  "sources": [
+    "../../App.svelte",
+    "../../Map.svelte"
+  ],
+  "sourcesContent": [
+    "<script>\n\timport Map from './component/Map.svelte';\n</script>\n\n<main>\n<Map></Map>\n</main>\n\n<style>\n\tmain {\n\t\ttext-align: center;\n\t\tpadding: 1em;\n\t\tmax-width: 240px;\n\t\tmargin: 0 auto;\n\t}\n\n\th1 {\n\t\tcolor: #ff3e00;\n\t\ttext-transform: uppercase;\n\t\tfont-size: 4em;\n\t\tfont-weight: 100;\n\t}\n\n\t@media (min-width: 640px) {\n\t\tmain {\n\t\t\tmax-width: none;\n\t\t}\n\t}\n</style>",
+    "<script>\n  import { Map, View } from \"ol\";\n  import TileLayer from \"ol/layer/Tile\";\n  import XYZ from \"ol/source/XYZ\";\n  import GeoJSON from \"ol/format/GeoJSON\";\n  import VectorLayer from \"ol/layer/Vector\";\n  import VectorSource from \"ol/source/Vector\";\n  import * as turf from \"@turf/turf\";\n  import * as json from \"../route.js\";\n\n  let googleMapsLink;\n  \n  export let id = \"map\";\n\n  var geojson = {\n    type: \"Feature\",\n    geometry: json\n  };\n\n  function setupMap(node, _id) {\n    const feature = new GeoJSON().readFeature(geojson);\n\n    // Calculate point position x miles away from the point\n    // coordinates beginning along the line\n    var pointAlongRoute = turf.along(\n      geojson.geometry,\n      prompt(\"Current number of miles accrued?\"),\n      {\n        units: \"miles\"\n      }\n    );\n    const pointAlongRouteCoords = pointAlongRoute.geometry.coordinates;\n    const point = new GeoJSON().readFeature(pointAlongRoute);\n\n    googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${pointAlongRouteCoords[1]},${pointAlongRouteCoords[0]}`;\n\n    const map = new Map({\n      target: id,\n      layers: [\n        new TileLayer({\n          source: new XYZ({\n            url: \"https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png\"\n          })\n        }),\n        new VectorLayer({\n          source: new VectorSource({\n            format: new GeoJSON(),\n            features: [feature, point]\n          })\n        })\n      ],\n      view: new View({\n        projection: \"EPSG:4326\",\n        center: [0, 0],\n        zoom: 2\n      })\n    });\n  }\n</script>\n\n<style>\n  #map {\n    height: 400px;\n    width: 100%;\n  }\n</style>\n\n<div {id} use:setupMap={id} />\n\n{#if googleMapsLink}\n  <a href={googleMapsLink}>Link to point on Google Maps</a>\n{/if}\n\n"
+  ],
+  "names": [],
+  "mappings": "AASC,IAAI,eAAC,CAAC,AACL,UAAU,CAAE,MAAM,CAClB,OAAO,CAAE,GAAG,CACZ,SAAS,CAAE,KAAK,CAChB,MAAM,CAAE,CAAC,CAAC,IAAI,AACf,CAAC,AASD,MAAM,AAAC,YAAY,KAAK,CAAC,AAAC,CAAC,AAC1B,IAAI,eAAC,CAAC,AACL,SAAS,CAAE,IAAI,AAChB,CAAC,AACF,CAAC;ACkCA,IAAI,eAAC,CAAC,AACJ,MAAM,CAAE,KAAK,CACb,KAAK,CAAE,IAAI,AACb,CAAC"
+}
